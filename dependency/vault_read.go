@@ -73,13 +73,13 @@ func (d *VaultReadQuery) Fetch(clients *ClientSet, opts *QueryOptions) (interfac
 		})
 
 		renewal, err := clients.Vault().Sys().Renew(d.secret.LeaseID, 0)
-		if err == nil {
+		if err == nil && renewal.LeaseDuration > (d.secret.LeaseDuration/2.0) {
 			log.Printf("[TRACE] %s: successfully renewed %s", d, d.secret.LeaseID)
 
 			secret := &Secret{
 				RequestID:     renewal.RequestID,
 				LeaseID:       renewal.LeaseID,
-				LeaseDuration: d.secret.LeaseDuration,
+				LeaseDuration: renewal.LeaseDuration,
 				Renewable:     renewal.Renewable,
 				Data:          d.secret.Data,
 			}
